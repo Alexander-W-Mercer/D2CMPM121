@@ -9,13 +9,13 @@ canvas.style.height = "256px";
 canvas.id = "sketch_canvas";
 canvas.style.display = "block";
 
-const undoButton = document.createElement("button");
-undoButton.id = "undo";
-undoButton.textContent = "Undo";
+const clearButton = document.createElement("button");
+clearButton.id = "clear";
+clearButton.textContent = "Clear";
 
 document.body.append(h1);
 document.body.append(canvas);
-document.body.append(undoButton);
+document.body.append(clearButton);
 
 const ctx = canvas.getContext("2d");
 if (ctx) {
