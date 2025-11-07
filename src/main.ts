@@ -1,15 +1,21 @@
 import "./style.css";
+
 const h1 = document.createElement("h1");
 h1.textContent = "Sticker Sketchpad";
-document.body.append(h1);
 
 const canvas = document.createElement("canvas");
-canvas.width = 256;
-canvas.height = 256;
 canvas.style.width = "256px";
 canvas.style.height = "256px";
 canvas.id = "sketch_canvas";
+canvas.style.display = "block";
+
+const undoButton = document.createElement("button");
+undoButton.id = "undo";
+undoButton.textContent = "Undo";
+
+document.body.append(h1);
 document.body.append(canvas);
+document.body.append(undoButton);
 
 const ctx = canvas.getContext("2d");
 if (ctx) {
