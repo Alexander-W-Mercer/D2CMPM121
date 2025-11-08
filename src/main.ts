@@ -53,6 +53,10 @@ if (ctx) {
     isDrawing = false;
   });
 
+  clearButton.addEventListener("click", () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  });
+
   ctx.fillStyle = "green";
   ctx.fillRect(10, 10, 150, 100);
 }
