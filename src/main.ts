@@ -20,7 +20,8 @@ document.body.append(clearButton);
 const ctx = canvas.getContext("2d");
 let isDrawing = false;
 
-const drawnPoints: number[][] = [];
+const drawnPoints: number[][][] = [];
+let segmentsDrawn = 0;
 
 // Force drawing buffer size to match display === The fact that I have to do this is really annoying.
 canvas.width = canvas.clientWidth;
@@ -30,32 +31,43 @@ function drawingChanged() {
   if (ctx && drawnPoints) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    ctx.beginPath(); // Start a new path
+    for (let i = 0; i <= segmentsDrawn; i++) {
+      ctx.beginPath(); // Start a new path
 
-    // Move to the first point without drawing
-    if (drawnPoints.length > 0) {
-      ctx.moveTo(drawnPoints[0]![0]!, drawnPoints[0]![1]!);
+      // Move to the first point without drawing
+      if (drawnPoints.length > 0) {
+        ctx.moveTo(
+          drawnPoints[i]![0]![0]!,
+          drawnPoints[i]![0]![1]!,
+        );
+      }
+
+      // Iterate through the remaining points and draw lines to them
+      for (let j = 0; j < drawnPoints[i]!.length; j++) {
+        ctx.lineTo(
+          drawnPoints[i]![j]![0]!,
+          drawnPoints[i]![j]![1]!,
+        );
+      }
+
+      ctx.strokeStyle = "black";
+      ctx.lineWidth = 2;
+
+      ctx.stroke(); // Render the line
     }
-
-    // Iterate through the remaining points and draw lines to them
-    for (let i = 1; i < drawnPoints.length; i++) {
-      ctx.lineTo(drawnPoints[i]![0]!, drawnPoints[i]![1]!);
-    }
-
-    ctx.strokeStyle = "black";
-    ctx.lineWidth = 2;
-
-    ctx.stroke(); // Render the line
   }
 }
 
 if (ctx) {
   canvas.addEventListener("mousedown", (e) => {
+    if (!drawnPoints[segmentsDrawn]) {
+      drawnPoints.push([]);
+    }
     isDrawing = true;
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left - 10; // magic number 10 is just to get it to the mouse pointer tip
     const y = e.clientY - rect.top - 10;
-    drawnPoints.push([x, y]);
+    drawnPoints[segmentsDrawn]!.push([x, y]);
   });
 
   canvas.addEventListener("mousemove", (e) => {
@@ -63,27 +75,31 @@ if (ctx) {
       const rect = canvas.getBoundingClientRect();
       const x = e.clientX - rect.left - 10; // magic number 10 is just to get it to the mouse pointer tip
       const y = e.clientY - rect.top - 10;
-      drawnPoints.push([x, y]);
 
-      console.log(drawnPoints);
+      drawnPoints[segmentsDrawn]!.push([x, y]);
 
       drawingChanged();
     }
   });
 
   canvas.addEventListener("mouseup", () => {
-    isDrawing = false;
-    drawnPoints.push([-1, -1]);
+    if (isDrawing == true) {
+      segmentsDrawn++;
+      isDrawing = false;
+    }
   });
 
   canvas.addEventListener("mouseleave", () => {
-    isDrawing = false;
+    if (isDrawing == true) {
+      segmentsDrawn++;
+      isDrawing = false;
+    }
   });
 
   clearButton.addEventListener("click", () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawnPoints.length = 0;
-    drawnPoints.push([-1, -1]);
+    segmentsDrawn = 0;
   });
 
   ctx.fillStyle = "green";
