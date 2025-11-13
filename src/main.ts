@@ -17,16 +17,22 @@ const undoButton = document.createElement("button");
 undoButton.id = "undo";
 undoButton.textContent = "Undo";
 
+const redoButton = document.createElement("button");
+redoButton.id = "redo";
+redoButton.textContent = "Redo";
+
 document.body.append(h1);
 document.body.append(canvas);
 document.body.append(clearButton);
 document.body.append(undoButton);
+document.body.append(redoButton);
 
 const ctx = canvas.getContext("2d");
 let isDrawing = false;
 
 const drawnPoints: number[][][] = [];
 let segmentsDrawn = 0;
+const undoHolder: number[][][] = [];
 
 // Force drawing buffer size to match display === The fact that I have to do this is really annoying.
 canvas.width = canvas.clientWidth;
@@ -36,7 +42,7 @@ function drawingChanged() {
   if (ctx && drawnPoints) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    for (let i = 0; i <= segmentsDrawn; i++) {
+    for (let i = 0; i <= segmentsDrawn - 1; i++) {
       ctx.beginPath(); // Start a new path
 
       // Move to the first point without drawing
@@ -69,10 +75,11 @@ if (ctx) {
       drawnPoints.push([]);
     }
     isDrawing = true;
+    segmentsDrawn++;
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left - 10; // magic number 10 is just to get it to the mouse pointer tip
     const y = e.clientY - rect.top - 10;
-    drawnPoints[segmentsDrawn]!.push([x, y]);
+    drawnPoints[segmentsDrawn - 1]!.push([x, y]);
   });
 
   canvas.addEventListener("mousemove", (e) => {
@@ -81,7 +88,7 @@ if (ctx) {
       const x = e.clientX - rect.left - 10; // magic number 10 is just to get it to the mouse pointer tip
       const y = e.clientY - rect.top - 10;
 
-      drawnPoints[segmentsDrawn]!.push([x, y]);
+      drawnPoints[segmentsDrawn - 1]!.push([x, y]);
 
       drawingChanged();
     }
@@ -89,14 +96,12 @@ if (ctx) {
 
   canvas.addEventListener("mouseup", () => {
     if (isDrawing == true) {
-      segmentsDrawn++;
       isDrawing = false;
     }
   });
 
   canvas.addEventListener("mouseleave", () => {
     if (isDrawing == true) {
-      segmentsDrawn++;
       isDrawing = false;
     }
   });
@@ -108,6 +113,24 @@ if (ctx) {
   });
 
   undoButton.addEventListener("click", () => {
+    if (drawnPoints[0]) {
+      console.log(undoHolder);
+      undoHolder.push(drawnPoints.pop()!);
+      segmentsDrawn--;
+      console.log(undoHolder);
+      if (drawnPoints.length > 0) {
+        drawingChanged();
+      } else {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawnPoints.length = 0;
+        segmentsDrawn = 0;
+      }
+    } else {
+      console.log("Nothing left to undo");
+    }
+  });
+
+  redoButton.addEventListener("click", () => {
     console.log("This does nothing yet :)");
   });
 
