@@ -13,9 +13,14 @@ const clearButton = document.createElement("button");
 clearButton.id = "clear";
 clearButton.textContent = "Clear";
 
+const undoButton = document.createElement("button");
+undoButton.id = "undo";
+undoButton.textContent = "Undo";
+
 document.body.append(h1);
 document.body.append(canvas);
 document.body.append(clearButton);
+document.body.append(undoButton);
 
 const ctx = canvas.getContext("2d");
 let isDrawing = false;
@@ -100,6 +105,10 @@ if (ctx) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawnPoints.length = 0;
     segmentsDrawn = 0;
+  });
+
+  undoButton.addEventListener("click", () => {
+    console.log("This does nothing yet :)");
   });
 
   ctx.fillStyle = "green";
