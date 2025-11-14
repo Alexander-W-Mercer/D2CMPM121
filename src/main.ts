@@ -70,38 +70,48 @@ document.body.append(redoButton);
 const ctx = canvas.getContext("2d");
 let isDrawing = false;
 
-const drawnPoints: number[][][] = [];
+const LineList: LineSegment[] = [];
 let segmentsDrawn = 0;
-const undoHolder: number[][][] = [];
+const undoHolder: LineSegment[] = [];
 
-//interface drawnLines {
-//  points: number[][];
-//}
+class LineSegment {
+  startingP: number[];
+  points: number[][];
+
+  constructor(x: number, y: number) {
+    this.startingP = [x, y];
+    segmentsDrawn++;
+    this.points = [];
+  }
+
+  drag(x: number, y: number): void {
+    console.log("We made it here :)");
+    this.points.push([x, y]);
+  }
+}
 
 // Force drawing buffer size to match display === The fact that I have to do this is really annoying.
 canvas.width = canvas.clientWidth;
 canvas.height = canvas.clientHeight;
 
 function drawingChanged() {
-  if (ctx && drawnPoints) {
+  if (ctx && LineList) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    for (let i = 0; i <= segmentsDrawn - 1; i++) {
+    for (let i = 0; i <= LineList.length - 1; i++) {
       ctx.beginPath(); // Start a new path
 
       // Move to the first point without drawing
-      if (drawnPoints.length > 0) {
-        ctx.moveTo(
-          drawnPoints[i]![0]![0]!,
-          drawnPoints[i]![0]![1]!,
-        );
-      }
+      ctx.moveTo(
+        LineList[i]!.startingP[0]!,
+        LineList[i]!.startingP[1]!,
+      );
 
       // Iterate through the remaining points and draw lines to them
-      for (let j = 0; j < drawnPoints[i]!.length; j++) {
+      for (let j = 0; j < LineList[i]!.points.length; j++) {
         ctx.lineTo(
-          drawnPoints[i]![j]![0]!,
-          drawnPoints[i]![j]![1]!,
+          LineList[i]!.points[j]![0]!,
+          LineList[i]!.points[j]![1]!,
         );
       }
 
@@ -115,24 +125,22 @@ function drawingChanged() {
 
 if (ctx) {
   canvas.addEventListener("mousedown", (e) => {
-    if (!drawnPoints[segmentsDrawn]) {
-      drawnPoints.push([]);
-    }
     isDrawing = true;
-    segmentsDrawn++;
     const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left - 10; // magic number 10 is just to get it to the mouse pointer tip
-    const y = e.clientY - rect.top - 10;
-    drawnPoints[segmentsDrawn - 1]!.push([x, y]);
+    LineList.push(
+      new LineSegment(e.clientX - rect.left - 10, e.clientY - rect.top - 10),
+    );
   });
 
   canvas.addEventListener("mousemove", (e) => {
     if (isDrawing) {
       const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left - 10; // magic number 10 is just to get it to the mouse pointer tip
-      const y = e.clientY - rect.top - 10;
 
-      drawnPoints[segmentsDrawn - 1]!.push([x, y]);
+      console.log(LineList);
+      LineList[LineList.length - 1]!.drag(
+        e.clientX - rect.left - 10,
+        e.clientY - rect.top - 10,
+      ); //draw connecting line
 
       drawingChanged();
     }
@@ -152,14 +160,14 @@ if (ctx) {
 
   clearButton.addEventListener("click", () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawnPoints.length = 0;
+    LineList.length = 0;
     segmentsDrawn = 0;
     undoHolder.length = 0;
   });
 
   undoButton.addEventListener("click", () => {
-    if (drawnPoints[0]) {
-      undoHolder.push(drawnPoints.pop()!);
+    if (LineList[0]) {
+      undoHolder.push(LineList.pop()!);
       segmentsDrawn--;
       drawingChanged();
     } else {
@@ -169,7 +177,7 @@ if (ctx) {
 
   redoButton.addEventListener("click", () => {
     if (undoHolder[0]) {
-      drawnPoints.push(undoHolder.pop()!);
+      LineList.push(undoHolder.pop()!);
       segmentsDrawn++;
       drawingChanged();
     } else {
