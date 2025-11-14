@@ -110,6 +110,7 @@ if (ctx) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawnPoints.length = 0;
     segmentsDrawn = 0;
+    undoHolder.length = 0;
   });
 
   undoButton.addEventListener("click", () => {
@@ -131,7 +132,15 @@ if (ctx) {
   });
 
   redoButton.addEventListener("click", () => {
-    console.log("This does nothing yet :)");
+    if (undoHolder[0]) {
+      console.log(undoHolder);
+      drawnPoints.push(undoHolder.pop()!);
+      segmentsDrawn++;
+      console.log(undoHolder);
+      drawingChanged();
+    } else {
+      console.log("Nothing left to redo");
+    }
   });
 
   ctx.fillStyle = "green";
