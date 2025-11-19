@@ -77,11 +77,13 @@ const undoHolder: LineSegment[] = [];
 class LineSegment {
   startingP: number[];
   points: number[][];
+  thickness: number;
 
-  constructor(x: number, y: number) {
+  constructor(x: number, y: number, thickness: number) {
     this.startingP = [x, y];
     segmentsDrawn++;
     this.points = [];
+    this.thickness = thickness;
   }
 
   drag(x: number, y: number): void {
@@ -106,7 +108,7 @@ class LineSegment {
     }
 
     ctx.strokeStyle = "black";
-    ctx.lineWidth = +slider.value;
+    ctx.lineWidth = this.thickness;
 
     ctx.stroke(); // Render the line
   }
@@ -131,7 +133,11 @@ if (ctx) {
     isDrawing = true;
     const rect = canvas.getBoundingClientRect();
     LineList.push(
-      new LineSegment(e.clientX - rect.left - 10, e.clientY - rect.top - 10),
+      new LineSegment(
+        e.clientX - rect.left - 10,
+        e.clientY - rect.top - 10,
+        +slider.value,
+      ),
     );
   });
 
