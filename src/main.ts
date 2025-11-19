@@ -70,11 +70,16 @@ document.body.append(redoButton);
 const ctx = canvas.getContext("2d");
 let isDrawing = false;
 
-const LineList: LineSegment[] = [];
-let segmentsDrawn = 0;
-const undoHolder: LineSegment[] = [];
+interface Drawable {
+  display(ctx: CanvasRenderingContext2D): void;
+  drag(x: number, y: number): void;
+}
 
-class LineSegment {
+const commandList: Drawable[] = [];
+let segmentsDrawn = 0;
+const undoHolder: Drawable[] = [];
+
+class LineSegment implements Drawable {
   startingP: number[];
   points: number[][];
   thickness: number;
@@ -119,11 +124,11 @@ canvas.width = canvas.clientWidth;
 canvas.height = canvas.clientHeight;
 
 function drawingChanged() {
-  if (ctx && LineList) {
+  if (ctx && commandList) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    for (let i = 0; i <= LineList.length - 1; i++) {
-      LineList[i]!.display(ctx);
+    for (let i = 0; i <= commandList.length - 1; i++) {
+      commandList[i]!.display(ctx);
     }
   }
 }
@@ -132,7 +137,7 @@ if (ctx) {
   canvas.addEventListener("mousedown", (e) => {
     isDrawing = true;
     const rect = canvas.getBoundingClientRect();
-    LineList.push(
+    commandList.push(
       new LineSegment(
         e.clientX - rect.left - 10,
         e.clientY - rect.top - 10,
@@ -145,8 +150,8 @@ if (ctx) {
     if (isDrawing) {
       const rect = canvas.getBoundingClientRect();
 
-      console.log(LineList);
-      LineList[LineList.length - 1]!.drag(
+      console.log(commandList);
+      commandList[commandList.length - 1]!.drag(
         e.clientX - rect.left - 10,
         e.clientY - rect.top - 10,
       ); //draw connecting line
@@ -169,14 +174,14 @@ if (ctx) {
 
   clearButton.addEventListener("click", () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    LineList.length = 0;
+    commandList.length = 0;
     segmentsDrawn = 0;
     undoHolder.length = 0;
   });
 
   undoButton.addEventListener("click", () => {
-    if (LineList[0]) {
-      undoHolder.push(LineList.pop()!);
+    if (commandList[0]) {
+      undoHolder.push(commandList.pop()!);
       segmentsDrawn--;
       drawingChanged();
     } else {
@@ -186,7 +191,7 @@ if (ctx) {
 
   redoButton.addEventListener("click", () => {
     if (undoHolder[0]) {
-      LineList.push(undoHolder.pop()!);
+      commandList.push(undoHolder.pop()!);
       segmentsDrawn++;
       drawingChanged();
     } else {
