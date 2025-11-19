@@ -99,6 +99,7 @@ class LineSegment implements Drawable {
 
   display(ctx: CanvasRenderingContext2D): void {
     ctx.beginPath(); // Start a new path
+    ctx.lineCap = "round";
 
     // Move to the first point without drawing
     ctx.moveTo(
