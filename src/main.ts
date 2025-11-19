@@ -67,7 +67,7 @@ document.body.append(clearButton);
 document.body.append(undoButton);
 document.body.append(redoButton);
 
-const ctx = canvas.getContext("2d");
+const ctx = canvas.getContext("2d")!;
 let isDrawing = false;
 
 interface Drawable {
@@ -78,6 +78,8 @@ interface Drawable {
 const commandList: Drawable[] = [];
 let segmentsDrawn = 0;
 const undoHolder: Drawable[] = [];
+
+let toolCommand: Drawable | null = null;
 
 class LineSegment implements Drawable {
   startingP: number[];
@@ -92,7 +94,6 @@ class LineSegment implements Drawable {
   }
 
   drag(x: number, y: number): void {
-    console.log("We made it here :)");
     this.points.push([x, y]);
   }
 
@@ -119,83 +120,116 @@ class LineSegment implements Drawable {
   }
 }
 
+class DrawToolPreview implements Drawable {
+  constructor(public x: number, public y: number, public radius: number) {}
+
+  drag(): void {
+    console.log("Do nothing - preview only");
+  }
+
+  display(ctx: CanvasRenderingContext2D): void {
+    ctx.beginPath(); // Start a new path
+    ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI); // Create a full circle arc
+    ctx.stroke(); // Draw the outline
+    ctx.fill(); // Fill the circle with the fillStyle
+  }
+}
+
 // Force drawing buffer size to match display === The fact that I have to do this is really annoying.
 canvas.width = canvas.clientWidth;
 canvas.height = canvas.clientHeight;
 
 function drawingChanged() {
-  if (ctx && commandList) {
+  canvas.dispatchEvent(new Event("drawingChanged"));
+}
+
+canvas.addEventListener("drawingChanged", onDisplayNeedsRefresh);
+canvas.addEventListener("toolMoved", onDisplayNeedsRefresh);
+
+function onDisplayNeedsRefresh() {
+  if (commandList) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     for (let i = 0; i <= commandList.length - 1; i++) {
       commandList[i]!.display(ctx);
     }
   }
+  if (toolCommand) {
+    toolCommand.display(ctx);
+  }
 }
 
-if (ctx) {
-  canvas.addEventListener("mousedown", (e) => {
-    isDrawing = true;
+canvas.addEventListener("mousedown", (e) => {
+  isDrawing = true;
+  const rect = canvas.getBoundingClientRect();
+  commandList.push(
+    new LineSegment(
+      e.clientX - rect.left - 10,
+      e.clientY - rect.top - 10,
+      +slider.value,
+    ),
+  );
+});
+
+canvas.addEventListener("mousemove", (e) => {
+  toolCommand = new DrawToolPreview(
+    e.clientX - canvas.getBoundingClientRect().left - 10,
+    e.clientY - canvas.getBoundingClientRect().top - 10,
+    +slider.value,
+  );
+  canvas.dispatchEvent(new Event("toolMoved"));
+
+  if (isDrawing) {
     const rect = canvas.getBoundingClientRect();
-    commandList.push(
-      new LineSegment(
-        e.clientX - rect.left - 10,
-        e.clientY - rect.top - 10,
-        +slider.value,
-      ),
-    );
-  });
 
-  canvas.addEventListener("mousemove", (e) => {
-    if (isDrawing) {
-      const rect = canvas.getBoundingClientRect();
+    console.log(commandList);
+    commandList[commandList.length - 1]!.drag(
+      e.clientX - rect.left - 10,
+      e.clientY - rect.top - 10,
+    ); //draw connecting line
 
-      console.log(commandList);
-      commandList[commandList.length - 1]!.drag(
-        e.clientX - rect.left - 10,
-        e.clientY - rect.top - 10,
-      ); //draw connecting line
+    drawingChanged();
+  }
+});
 
-      drawingChanged();
-    }
-  });
+canvas.addEventListener("mouseup", () => {
+  if (isDrawing == true) {
+    isDrawing = false;
+  }
+});
 
-  canvas.addEventListener("mouseup", () => {
-    if (isDrawing == true) {
-      isDrawing = false;
-    }
-  });
+canvas.addEventListener("mouseleave", () => {
+  toolCommand = null;
+  canvas.dispatchEvent(new Event("toolMoved"));
 
-  canvas.addEventListener("mouseleave", () => {
-    if (isDrawing == true) {
-      isDrawing = false;
-    }
-  });
+  if (isDrawing == true) {
+    isDrawing = false;
+  }
+});
 
-  clearButton.addEventListener("click", () => {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    commandList.length = 0;
-    segmentsDrawn = 0;
-    undoHolder.length = 0;
-  });
+clearButton.addEventListener("click", () => {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  commandList.length = 0;
+  segmentsDrawn = 0;
+  undoHolder.length = 0;
+});
 
-  undoButton.addEventListener("click", () => {
-    if (commandList[0]) {
-      undoHolder.push(commandList.pop()!);
-      segmentsDrawn--;
-      drawingChanged();
-    } else {
-      console.log("Nothing left to undo");
-    }
-  });
+undoButton.addEventListener("click", () => {
+  if (commandList[0]) {
+    undoHolder.push(commandList.pop()!);
+    segmentsDrawn--;
+    drawingChanged();
+  } else {
+    console.log("Nothing left to undo");
+  }
+});
 
-  redoButton.addEventListener("click", () => {
-    if (undoHolder[0]) {
-      commandList.push(undoHolder.pop()!);
-      segmentsDrawn++;
-      drawingChanged();
-    } else {
-      console.log("Nothing left to redo");
-    }
-  });
-}
+redoButton.addEventListener("click", () => {
+  if (undoHolder[0]) {
+    commandList.push(undoHolder.pop()!);
+    segmentsDrawn++;
+    drawingChanged();
+  } else {
+    console.log("Nothing left to redo");
+  }
+});
