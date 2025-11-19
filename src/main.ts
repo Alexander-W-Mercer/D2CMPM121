@@ -198,7 +198,4 @@ if (ctx) {
       console.log("Nothing left to redo");
     }
   });
-
-  ctx.fillStyle = "green";
-  ctx.fillRect(10, 10, 150, 100);
 }
