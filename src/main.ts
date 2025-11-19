@@ -130,7 +130,6 @@ class DrawToolPreview implements Drawable {
   display(ctx: CanvasRenderingContext2D): void {
     ctx.beginPath(); // Start a new path
     ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI); // Create a full circle arc
-    ctx.stroke(); // Draw the outline
     ctx.fill(); // Fill the circle with the fillStyle
   }
 }
@@ -175,7 +174,7 @@ canvas.addEventListener("mousemove", (e) => {
   toolCommand = new DrawToolPreview(
     e.clientX - canvas.getBoundingClientRect().left - 10,
     e.clientY - canvas.getBoundingClientRect().top - 10,
-    +slider.value,
+    +slider.value / 2,
   );
   canvas.dispatchEvent(new Event("toolMoved"));
 
