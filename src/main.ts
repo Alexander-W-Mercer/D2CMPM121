@@ -88,6 +88,28 @@ class LineSegment {
     console.log("We made it here :)");
     this.points.push([x, y]);
   }
+
+  display(ctx: CanvasRenderingContext2D): void {
+    ctx.beginPath(); // Start a new path
+
+    // Move to the first point without drawing
+    ctx.moveTo(
+      this.startingP[0]!,
+      this.startingP[1]!,
+    );
+
+    for (let i = 0; i < this.points.length; i++) {
+      ctx.lineTo(
+        this.points[i]![0]!,
+        this.points[i]![1]!,
+      );
+    }
+
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = +slider.value;
+
+    ctx.stroke(); // Render the line
+  }
 }
 
 // Force drawing buffer size to match display === The fact that I have to do this is really annoying.
@@ -99,26 +121,7 @@ function drawingChanged() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     for (let i = 0; i <= LineList.length - 1; i++) {
-      ctx.beginPath(); // Start a new path
-
-      // Move to the first point without drawing
-      ctx.moveTo(
-        LineList[i]!.startingP[0]!,
-        LineList[i]!.startingP[1]!,
-      );
-
-      // Iterate through the remaining points and draw lines to them
-      for (let j = 0; j < LineList[i]!.points.length; j++) {
-        ctx.lineTo(
-          LineList[i]!.points[j]![0]!,
-          LineList[i]!.points[j]![1]!,
-        );
-      }
-
-      ctx.strokeStyle = "black";
-      ctx.lineWidth = +slider.value;
-
-      ctx.stroke(); // Render the line
+      LineList[i]!.display(ctx);
     }
   }
 }
