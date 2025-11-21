@@ -111,19 +111,16 @@ for (const sticker of stickers) {
         document.getElementById(button.id)!.style.backgroundColor = "";
       }
       element.style.backgroundColor = "gray";
-      toolSelect = sticker.name;
+      drawToolActive = sticker.name;
     } else {
       element.style.backgroundColor = "";
-      toolSelect = "draw";
+      drawToolActive = "draw";
     }
     canvas.dispatchEvent(new Event("toolMoved"));
   });
 }
 
-//document.body.style.backgroundColor = "lightgreen";
-
 const text = prompt("Custom sticker text", "🧽");
-let toolSelect = "draw";
 
 if (text !== null) {
   console.log(`User entered: ${text}`);
@@ -144,6 +141,7 @@ let segmentsDrawn = 0;
 const undoHolder: Drawable[] = [];
 
 let toolCommand: Drawable | null = null;
+let drawToolActive = "draw";
 
 class LineSegment implements Drawable {
   startingP: number[];
@@ -213,12 +211,11 @@ class StickerToolPreview implements Drawable {
 
   display(ctx: CanvasRenderingContext2D): void {
     ctx.beginPath(); // Start a new path
-    ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI); // Create a full circle arc
     ctx.fill(); // Fill the circle with the fillStyle
   }
 }
 
-// Force drawing buffer size to match display === The fact that I have to do this is really annoying.
+// Force drawing buffer size to match display === The fact that I have to do this is somewhat annoying. Strange.
 canvas.width = canvas.clientWidth;
 canvas.height = canvas.clientHeight;
 
@@ -255,11 +252,20 @@ canvas.addEventListener("mousedown", (e) => {
 });
 
 canvas.addEventListener("mousemove", (e) => {
-  toolCommand = new DrawToolPreview(
-    e.clientX - canvas.getBoundingClientRect().left - 10,
-    e.clientY - canvas.getBoundingClientRect().top - 10,
-    +slider.value / 2,
-  );
+  if (drawToolActive == "draw") {
+    toolCommand = new DrawToolPreview(
+      e.clientX - canvas.getBoundingClientRect().left - 10,
+      e.clientY - canvas.getBoundingClientRect().top - 10,
+      +slider.value / 2,
+    );
+  } else {
+    toolCommand = new StickerToolPreview(
+      e.clientX - canvas.getBoundingClientRect().left - 10,
+      e.clientY - canvas.getBoundingClientRect().top - 10,
+      +slider.value,
+      drawToolActive,
+    );
+  }
   canvas.dispatchEvent(new Event("toolMoved"));
 
   if (isDrawing) {
