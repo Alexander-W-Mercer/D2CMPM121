@@ -1,3 +1,3 @@
 # CMPM 121 D2 Project
 
-This is the starting point for your CMPM 121 D2 project. Students should make sure to remove _this_ content from their README.md file and replace it with their own project documentation.
+This is a project I have made for my CMPM 121 class, known as the D2 project. For this project, I have to make a simple drawing program following several different steps, and refactoring based on different requirements as I go. The program is capable of drawing, changing brush size, undoing, redoing, and also adding several different types of stickers for the users enjoyment. :)
