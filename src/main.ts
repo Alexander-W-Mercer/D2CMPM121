@@ -176,8 +176,9 @@ class StickerToolPreview implements Drawable {
     public emoji: string,
   ) {}
 
-  drag(): void {
-    console.log("Do nothing - preview only");
+  drag(x: number, y: number): void {
+    this.x = x;
+    this.y = y;
   }
 
   display(ctx: CanvasRenderingContext2D): void {
