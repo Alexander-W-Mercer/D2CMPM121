@@ -17,21 +17,13 @@ const undoButton = document.createElement("button");
 undoButton.id = "undo";
 undoButton.textContent = "Undo";
 
-const skullButton = document.createElement("button");
-skullButton.id = "skull";
-skullButton.textContent = "💀";
-
-const heartButton = document.createElement("button");
-heartButton.id = "heart";
-heartButton.textContent = "❤️";
-
-const thumbButton = document.createElement("button");
-thumbButton.id = "thumb";
-thumbButton.textContent = "👍";
-
 const redoButton = document.createElement("button");
 redoButton.id = "redo";
 redoButton.textContent = "Redo";
+
+const customStickerButton = document.createElement("button");
+customStickerButton.id = "customSticker";
+customStickerButton.textContent = "Custom Sticker";
 
 //--------------------
 // Create slider container
@@ -78,6 +70,10 @@ document.body.appendChild(container);
 document.body.append(clearButton);
 document.body.append(undoButton);
 document.body.append(redoButton);
+document.body.append(customStickerButton);
+
+const stickerRow = document.createElement("div");
+document.body.appendChild(stickerRow);
 
 interface Sticker {
   id: string;
@@ -118,14 +114,6 @@ for (const sticker of stickers) {
     }
     canvas.dispatchEvent(new Event("toolMoved"));
   });
-}
-
-const text = prompt("Custom sticker text", "🧽");
-
-if (text !== null) {
-  console.log(`User entered: ${text}`);
-} else {
-  console.log("User cancelled the prompt.");
 }
 
 const ctx = canvas.getContext("2d")!;
@@ -330,5 +318,21 @@ redoButton.addEventListener("click", () => {
     drawingChanged();
   } else {
     console.log("Nothing left to redo");
+  }
+});
+
+customStickerButton.addEventListener("click", () => {
+  const text = prompt("Custom sticker text", "🧽");
+
+  if (text !== null) {
+    stickers.push(
+      {
+        id: text,
+        name: text,
+      },
+    );
+    console.log(stickers);
+  } else {
+    console.log("User cancelled the prompt.");
   }
 });
