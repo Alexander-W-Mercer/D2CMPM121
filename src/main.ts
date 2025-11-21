@@ -210,8 +210,8 @@ class StickerToolPreview implements Drawable {
   }
 
   display(ctx: CanvasRenderingContext2D): void {
-    ctx.beginPath(); // Start a new path
-    ctx.fill(); // Fill the circle with the fillStyle
+    ctx.font = `${this.size}px serif`;
+    ctx.fillText(this.emoji, this.x, this.y);
   }
 }
 
@@ -242,13 +242,24 @@ function onDisplayNeedsRefresh() {
 canvas.addEventListener("mousedown", (e) => {
   isDrawing = true;
   const rect = canvas.getBoundingClientRect();
-  commandList.push(
-    new LineSegment(
-      e.clientX - rect.left - 10,
-      e.clientY - rect.top - 10,
-      +slider.value,
-    ),
-  );
+  if (drawToolActive == "draw") {
+    commandList.push(
+      new LineSegment(
+        e.clientX - rect.left - 10,
+        e.clientY - rect.top - 10,
+        +slider.value,
+      ),
+    );
+  } else {
+    commandList.push(
+      new StickerToolPreview(
+        e.clientX - rect.left - 10,
+        e.clientY - rect.top - 10,
+        +slider.value * 2,
+        drawToolActive,
+      ),
+    );
+  }
 });
 
 canvas.addEventListener("mousemove", (e) => {
@@ -262,7 +273,7 @@ canvas.addEventListener("mousemove", (e) => {
     toolCommand = new StickerToolPreview(
       e.clientX - canvas.getBoundingClientRect().left - 10,
       e.clientY - canvas.getBoundingClientRect().top - 10,
-      +slider.value,
+      +slider.value * 2,
       drawToolActive,
     );
   }
