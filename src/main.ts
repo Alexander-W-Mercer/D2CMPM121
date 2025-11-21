@@ -17,6 +17,18 @@ const undoButton = document.createElement("button");
 undoButton.id = "undo";
 undoButton.textContent = "Undo";
 
+const skullButton = document.createElement("button");
+skullButton.id = "skull";
+skullButton.textContent = "💀";
+
+const heartButton = document.createElement("button");
+heartButton.id = "heart";
+heartButton.textContent = "❤️";
+
+const thumbButton = document.createElement("button");
+thumbButton.id = "thumb";
+thumbButton.textContent = "👍";
+
 const redoButton = document.createElement("button");
 redoButton.id = "redo";
 redoButton.textContent = "Redo";
@@ -66,6 +78,58 @@ document.body.appendChild(container);
 document.body.append(clearButton);
 document.body.append(undoButton);
 document.body.append(redoButton);
+
+interface Sticker {
+  id: string;
+  name: string;
+}
+
+const stickers: Sticker[] = [
+  {
+    id: "skull",
+    name: "💀",
+  },
+  {
+    id: "heart",
+    name: "❤️",
+  },
+  {
+    id: "thumb",
+    name: "👍",
+  },
+];
+
+for (const sticker of stickers) {
+  const element = document.createElement("button");
+  element.id = sticker.id;
+  element.innerHTML = `${sticker.name}`;
+  document.body.appendChild(element);
+
+  element.addEventListener("click", () => {
+    if (element.style.backgroundColor !== "gray") {
+      for (const button of stickers) {
+        document.getElementById(button.id)!.style.backgroundColor = "";
+      }
+      element.style.backgroundColor = "gray";
+      toolSelect = sticker.name;
+    } else {
+      element.style.backgroundColor = "";
+      toolSelect = "draw";
+    }
+    canvas.dispatchEvent(new Event("toolMoved"));
+  });
+}
+
+//document.body.style.backgroundColor = "lightgreen";
+
+const text = prompt("Custom sticker text", "🧽");
+let toolSelect = "draw";
+
+if (text !== null) {
+  console.log(`User entered: ${text}`);
+} else {
+  console.log("User cancelled the prompt.");
+}
 
 const ctx = canvas.getContext("2d")!;
 let isDrawing = false;
@@ -135,6 +199,25 @@ class DrawToolPreview implements Drawable {
   }
 }
 
+class StickerToolPreview implements Drawable {
+  constructor(
+    public x: number,
+    public y: number,
+    public size: number,
+    public emoji: string,
+  ) {}
+
+  drag(): void {
+    console.log("Do nothing - preview only");
+  }
+
+  display(ctx: CanvasRenderingContext2D): void {
+    ctx.beginPath(); // Start a new path
+    ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI); // Create a full circle arc
+    ctx.fill(); // Fill the circle with the fillStyle
+  }
+}
+
 // Force drawing buffer size to match display === The fact that I have to do this is really annoying.
 canvas.width = canvas.clientWidth;
 canvas.height = canvas.clientHeight;
@@ -182,7 +265,6 @@ canvas.addEventListener("mousemove", (e) => {
   if (isDrawing) {
     const rect = canvas.getBoundingClientRect();
 
-    console.log(commandList);
     commandList[commandList.length - 1]!.drag(
       e.clientX - rect.left - 10,
       e.clientY - rect.top - 10,
