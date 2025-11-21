@@ -96,24 +96,7 @@ const stickers: Sticker[] = [
 ];
 
 for (const sticker of stickers) {
-  const element = document.createElement("button");
-  element.id = sticker.id;
-  element.innerHTML = `${sticker.name}`;
-  document.body.appendChild(element);
-
-  element.addEventListener("click", () => {
-    if (element.style.backgroundColor !== "gray") {
-      for (const button of stickers) {
-        document.getElementById(button.id)!.style.backgroundColor = "";
-      }
-      element.style.backgroundColor = "gray";
-      drawToolActive = sticker.name;
-    } else {
-      element.style.backgroundColor = "";
-      drawToolActive = "draw";
-    }
-    canvas.dispatchEvent(new Event("toolMoved"));
-  });
+  addStickerButton(sticker);
 }
 
 const ctx = canvas.getContext("2d")!;
@@ -206,6 +189,27 @@ class StickerToolPreview implements Drawable {
 // Force drawing buffer size to match display === The fact that I have to do this is somewhat annoying. Strange.
 canvas.width = canvas.clientWidth;
 canvas.height = canvas.clientHeight;
+
+function addStickerButton(sticker: Sticker) {
+  const element = document.createElement("button");
+  element.id = sticker.id;
+  element.innerHTML = `${sticker.name}`;
+  document.body.appendChild(element);
+
+  element.addEventListener("click", () => {
+    if (element.style.backgroundColor !== "gray") {
+      for (const button of stickers) {
+        document.getElementById(button.id)!.style.backgroundColor = "";
+      }
+      element.style.backgroundColor = "gray";
+      drawToolActive = sticker.name;
+    } else {
+      element.style.backgroundColor = "";
+      drawToolActive = "draw";
+    }
+    canvas.dispatchEvent(new Event("toolMoved"));
+  });
+}
 
 function drawingChanged() {
   canvas.dispatchEvent(new Event("drawingChanged"));
@@ -331,7 +335,12 @@ customStickerButton.addEventListener("click", () => {
         name: text,
       },
     );
-    console.log(stickers);
+    addStickerButton(
+      {
+        id: text,
+        name: text,
+      },
+    );
   } else {
     console.log("User cancelled the prompt.");
   }
