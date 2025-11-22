@@ -21,6 +21,10 @@ const redoButton = document.createElement("button");
 redoButton.id = "redo";
 redoButton.textContent = "Redo";
 
+const exportButton = document.createElement("button");
+exportButton.id = "export";
+exportButton.textContent = "Export";
+
 const customStickerButton = document.createElement("button");
 customStickerButton.id = "customSticker";
 customStickerButton.textContent = "Custom Sticker";
@@ -71,6 +75,7 @@ document.body.append(clearButton);
 document.body.append(undoButton);
 document.body.append(redoButton);
 document.body.append(customStickerButton);
+document.body.append(exportButton);
 
 const stickerRow = document.createElement("div");
 document.body.appendChild(stickerRow);
@@ -345,4 +350,34 @@ customStickerButton.addEventListener("click", () => {
   } else {
     console.log("User cancelled the prompt.");
   }
+});
+
+exportButton.addEventListener("click", () => {
+  const canvasExp = document.createElement("canvas");
+  canvasExp.style.width = "1024px";
+  canvasExp.style.height = "1024px";
+  canvasExp.id = "sketch_canvas";
+  canvasExp.style.display = "block";
+  document.body.append(canvasExp);
+
+  canvasExp.width = canvasExp.clientWidth;
+  canvasExp.height = canvasExp.clientHeight;
+
+  const ctx2 = canvasExp.getContext("2d")!;
+
+  ctx2.scale(4, 4); // Scale drawing to 4x for higher resolution
+
+  for (let i = 0; i <= commandList.length - 1; i++) {
+    commandList[i]!.display(ctx2);
+  }
+
+  const dataURL = canvasExp.toDataURL("image/png");
+  const link = document.createElement("a");
+  link.href = dataURL;
+  link.download = "sticker_sketchpad_drawing.png";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  document.body.removeChild(canvasExp);
 });
