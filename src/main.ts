@@ -77,6 +77,8 @@ document.body.append(redoButton);
 document.body.append(customStickerButton);
 document.body.append(exportButton);
 
+canvas.style.cursor = "crosshair";
+
 const stickerRow = document.createElement("div");
 document.body.appendChild(stickerRow);
 
@@ -87,16 +89,28 @@ interface Sticker {
 
 const stickers: Sticker[] = [
   {
-    id: "skull",
-    name: "💀",
+    id: "joytears",
+    name: "😂",
   },
   {
     id: "heart",
     name: "❤️",
   },
   {
+    id: "rollinglaugh",
+    name: "🤣",
+  },
+  {
+    id: "crying",
+    name: "😭",
+  },
+  {
     id: "thumb",
     name: "👍",
+  },
+  {
+    id: "skull",
+    name: "💀",
   },
 ];
 
@@ -188,7 +202,7 @@ class StickerToolPreview implements Drawable {
 
   display(ctx: CanvasRenderingContext2D): void {
     ctx.font = `${this.size}px serif`;
-    ctx.fillText(this.emoji, this.x, this.y);
+    ctx.fillText(this.emoji, this.x - this.size / 2, this.y + this.size / 2);
   }
 }
 
