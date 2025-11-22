@@ -12,22 +12,27 @@ canvas.style.display = "block";
 const clearButton = document.createElement("button");
 clearButton.id = "clear";
 clearButton.textContent = "Clear";
+clearButton.className = "fancy-button"; // applies the style
 
 const undoButton = document.createElement("button");
 undoButton.id = "undo";
 undoButton.textContent = "Undo";
+undoButton.className = "fancy-button"; // applies the style
 
 const redoButton = document.createElement("button");
 redoButton.id = "redo";
 redoButton.textContent = "Redo";
+redoButton.className = "fancy-button"; // applies the style
 
 const exportButton = document.createElement("button");
 exportButton.id = "export";
 exportButton.textContent = "Export";
+exportButton.className = "fancy-button"; // applies the style
 
 const customStickerButton = document.createElement("button");
 customStickerButton.id = "customSticker";
 customStickerButton.textContent = "Custom Sticker";
+customStickerButton.className = "fancy-button"; // applies the style
 
 //--------------------
 // Create slider container
@@ -215,6 +220,7 @@ function addStickerButton(sticker: Sticker) {
   element.id = sticker.id;
   element.innerHTML = `${sticker.name}`;
   document.body.appendChild(element);
+  element.className = "fancy-button"; // applies the style
 
   element.addEventListener("click", () => {
     if (element.style.backgroundColor !== "gray") {

@@ -12,3 +12,23 @@
   box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
   touch-action: none;
 }
+
+.fancy-button {
+  padding: 12px 24px;
+  font-size: 16px;
+  border-radius: 8px;
+  background-color: #4a6fa5;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin: 8px;
+}
+
+.fancy-button:hover {
+  background-color: #3a5a8c;
+}
+
+.fancy-button:active {
+  transform: scale(0.98);
+}
