@@ -318,6 +318,68 @@ canvas.addEventListener("mouseleave", () => {
   }
 });
 
+////////////////////////////////////////////////////////////////////////////////////Mobile specific touch handling:
+
+canvas.addEventListener("touchstart", (e) => {
+  isDrawing = true;
+  const rect = canvas.getBoundingClientRect();
+  if (drawToolActive == "draw") {
+    commandList.push(
+      new LineSegment(
+        e.touches[0]!.clientX - rect.left - 10,
+        e.touches[0]!.clientY - rect.top - 10,
+        +slider.value,
+      ),
+    );
+  } else {
+    commandList.push(
+      new StickerToolPreview(
+        e.touches[0]!.clientX - rect.left - 10,
+        e.touches[0]!.clientY - rect.top - 10,
+        +slider.value * 2,
+        drawToolActive,
+      ),
+    );
+  }
+});
+
+canvas.addEventListener("touchmove", (e) => {
+  if (drawToolActive == "draw") {
+    toolCommand = new DrawToolPreview(
+      e.touches[0]!.clientX - canvas.getBoundingClientRect().left - 10,
+      e.touches[0]!.clientY - canvas.getBoundingClientRect().top - 10,
+      +slider.value / 2,
+    );
+  } else {
+    toolCommand = new StickerToolPreview(
+      e.touches[0]!.clientX - canvas.getBoundingClientRect().left - 10,
+      e.touches[0]!.clientY - canvas.getBoundingClientRect().top - 10,
+      +slider.value * 2,
+      drawToolActive,
+    );
+  }
+  canvas.dispatchEvent(new Event("toolMoved"));
+
+  if (isDrawing) {
+    const rect = canvas.getBoundingClientRect();
+
+    commandList[commandList.length - 1]!.drag(
+      e.touches[0]!.clientX - rect.left - 10,
+      e.touches[0]!.clientY - rect.top - 10,
+    ); //draw connecting line
+
+    drawingChanged();
+  }
+});
+
+canvas.addEventListener("touchend", () => {
+  if (isDrawing == true) {
+    isDrawing = false;
+  }
+});
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 clearButton.addEventListener("click", () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   commandList.length = 0;
