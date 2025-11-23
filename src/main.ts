@@ -35,41 +35,71 @@ customStickerButton.textContent = "Custom Sticker";
 customStickerButton.className = "fancy-button"; // applies the style
 
 //--------------------
-// Create slider container
+// Create sizeSlider container
 const container = document.createElement("div");
 container.style.margin = "20px";
 
 // Create label
-const label = document.createElement("label");
-label.textContent = "Brush Size: ";
-label.htmlFor = "size-slider";
+const sizeLabel = document.createElement("label");
+sizeLabel.textContent = "Brush Size: ";
+sizeLabel.htmlFor = "size-sizeSlider";
+
+// Create lable for rotation slider
+const angleLabel = document.createElement("label");
+angleLabel.textContent = "Rotation: ";
+angleLabel.htmlFor = "angle-angleSlider";
 
 // Create span to show value
-const valueDisplay = document.createElement("span");
-valueDisplay.id = "value-display";
-valueDisplay.textContent = "5";
+const sizeDisplay = document.createElement("span");
+sizeDisplay.id = "value-display";
+sizeDisplay.textContent = "5";
 
-// Create the slider input
-const slider = document.createElement("input");
-slider.type = "range";
-slider.id = "size-slider";
-slider.min = "1";
-slider.max = "50";
-slider.value = "5";
-slider.step = "1";
-slider.style.width = "200px";
+// Create span to show value
+const rotateDisplay = document.createElement("span");
+rotateDisplay.id = "rotate-display";
+rotateDisplay.textContent = "0";
 
-// Update display when slider changes
-slider.addEventListener("input", () => {
-  valueDisplay.textContent = slider.value;
+// Create the sizeSlider input
+const sizeSlider = document.createElement("input");
+sizeSlider.type = "range";
+sizeSlider.id = "size-sizeSlider";
+sizeSlider.min = "1";
+sizeSlider.max = "50";
+sizeSlider.value = "5";
+sizeSlider.step = "1";
+sizeSlider.style.width = "200px";
+
+// Create the sizeSlider input
+const angleSlider = document.createElement("input");
+angleSlider.type = "range";
+angleSlider.id = "angle-angleSlider";
+angleSlider.min = "0";
+angleSlider.max = "360";
+angleSlider.value = "0";
+angleSlider.step = "0";
+angleSlider.style.width = "360px";
+
+// Update display when sizeSlider changes
+sizeSlider.addEventListener("input", () => {
+  sizeDisplay.textContent = sizeSlider.value;
+});
+
+angleSlider.addEventListener("input", () => {
+  rotateDisplay.textContent = angleSlider.value;
 });
 
 // Append everything to the container
-container.appendChild(label);
-container.appendChild(valueDisplay);
+container.appendChild(sizeLabel);
+container.appendChild(sizeDisplay);
 container.appendChild(document.createTextNode("px"));
 container.appendChild(document.createElement("br"));
-container.appendChild(slider);
+container.appendChild(sizeSlider);
+container.appendChild(document.createElement("br"));
+container.appendChild(angleLabel);
+container.appendChild(rotateDisplay);
+container.appendChild(document.createTextNode("°"));
+container.appendChild(document.createElement("br"));
+container.appendChild(angleSlider);
 
 //--------------------
 
@@ -198,6 +228,7 @@ class StickerToolPreview implements Drawable {
     public y: number,
     public size: number,
     public emoji: string,
+    public angle: number = 0,
   ) {}
 
   drag(x: number, y: number): void {
@@ -207,7 +238,11 @@ class StickerToolPreview implements Drawable {
 
   display(ctx: CanvasRenderingContext2D): void {
     ctx.font = `${this.size}px serif`;
-    ctx.fillText(this.emoji, this.x - this.size / 2, this.y + this.size / 2);
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.rotate((this.angle * Math.PI) / 180);
+    ctx.fillText(this.emoji, -this.size / 2, this.size / 2);
+    ctx.restore();
   }
 }
 
@@ -265,7 +300,7 @@ canvas.addEventListener("mousedown", (e) => {
       new LineSegment(
         e.clientX - rect.left - 10,
         e.clientY - rect.top - 10,
-        +slider.value,
+        +sizeSlider.value,
       ),
     );
   } else {
@@ -273,8 +308,9 @@ canvas.addEventListener("mousedown", (e) => {
       new StickerToolPreview(
         e.clientX - rect.left - 10,
         e.clientY - rect.top - 10,
-        +slider.value * 2,
+        +sizeSlider.value * 2,
         drawToolActive,
+        +angleSlider.value,
       ),
     );
   }
@@ -285,14 +321,15 @@ canvas.addEventListener("mousemove", (e) => {
     toolCommand = new DrawToolPreview(
       e.clientX - canvas.getBoundingClientRect().left - 10,
       e.clientY - canvas.getBoundingClientRect().top - 10,
-      +slider.value / 2,
+      +sizeSlider.value / 2,
     );
   } else {
     toolCommand = new StickerToolPreview(
       e.clientX - canvas.getBoundingClientRect().left - 10,
       e.clientY - canvas.getBoundingClientRect().top - 10,
-      +slider.value * 2,
+      +sizeSlider.value * 2,
       drawToolActive,
+      +angleSlider.value,
     );
   }
   canvas.dispatchEvent(new Event("toolMoved"));
@@ -334,7 +371,7 @@ canvas.addEventListener("touchstart", (e) => {
       new LineSegment(
         e.touches[0]!.clientX - rect.left - 10,
         e.touches[0]!.clientY - rect.top - 10,
-        +slider.value,
+        +sizeSlider.value,
       ),
     );
   } else {
@@ -342,8 +379,9 @@ canvas.addEventListener("touchstart", (e) => {
       new StickerToolPreview(
         e.touches[0]!.clientX - rect.left - 10,
         e.touches[0]!.clientY - rect.top - 10,
-        +slider.value * 2,
+        +sizeSlider.value * 2,
         drawToolActive,
+        +angleSlider.value,
       ),
     );
   }
@@ -354,14 +392,15 @@ canvas.addEventListener("touchmove", (e) => {
     toolCommand = new DrawToolPreview(
       e.touches[0]!.clientX - canvas.getBoundingClientRect().left - 10,
       e.touches[0]!.clientY - canvas.getBoundingClientRect().top - 10,
-      +slider.value / 2,
+      +sizeSlider.value / 2,
     );
   } else {
     toolCommand = new StickerToolPreview(
       e.touches[0]!.clientX - canvas.getBoundingClientRect().left - 10,
       e.touches[0]!.clientY - canvas.getBoundingClientRect().top - 10,
-      +slider.value * 2,
+      +sizeSlider.value * 2,
       drawToolActive,
+      +angleSlider.value,
     );
   }
   canvas.dispatchEvent(new Event("toolMoved"));
